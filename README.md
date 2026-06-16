@@ -115,6 +115,54 @@ After building the project, add a server entry to your Claude Desktop MCP config
 }
 ```
 
+## Hermes Agent Example
+
+Hermes Agent reads MCP configuration from `~/.hermes/config.yaml`. Add this under the top-level `mcp_servers` key. If your config already has an `mcp_servers` section, add only the `fraudguard` block under it.
+
+```yaml
+mcp_servers:
+  fraudguard:
+    command: "node"
+    args:
+      - "C:/path/to/fraudguard-mcp/dist/index.js"
+    env:
+      FRAUDGUARD_API_USERNAME: "your_username"
+      FRAUDGUARD_API_PASSWORD: "your_password"
+    tools:
+      include:
+        - check_ip
+        - bulk_check_ips
+      resources: false
+      prompts: false
+```
+
+Replace the `args` path with the real path to `dist/index.js` after running `npm run build`. On Windows, use forward slashes in the YAML path, for example `C:/Users/you/Code/fraudguard-mcp/dist/index.js`.
+
+The `tools.include` block limits Hermes to the two read-only FraudGuard MCP tools. `resources: false` and `prompts: false` keep Hermes from registering extra MCP utility wrappers that this server does not need.
+
+## OpenAI Codex Example
+
+OpenAI Codex CLI and the Codex IDE extension read MCP configuration from `~/.codex/config.toml`. Add this to connect Codex to the local FraudGuard MCP server over stdio.
+
+```toml
+[mcp_servers.fraudguard]
+command = "node"
+args = ["/absolute/path/to/fraudguard-mcp/dist/index.js"]
+enabled_tools = ["check_ip", "bulk_check_ips"]
+
+[mcp_servers.fraudguard.env]
+FRAUDGUARD_API_USERNAME = "your_username"
+FRAUDGUARD_API_PASSWORD = "your_password"
+```
+
+On Windows, use forward slashes in the path:
+
+```toml
+args = ["C:/path/to/fraudguard-mcp/dist/index.js"]
+```
+
+After saving the config, start Codex and run `/mcp` to verify the server is connected. The tools should appear as `check_ip` and `bulk_check_ips`.
+
 ## Example Prompts
 
 - "Check the risk of 8.216.12.173"
